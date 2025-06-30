@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load time_filters %}
+
+{% block title %}Dashboard - Time & Attendance System{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="md:flex md:items-center md:justify-between">
+            <div class="flex-1 min-w-0">
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                    Welcome back, {{ user.get_full_name }}!
+                </h2>
+                <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <i class="flex-shrink-0 mr-1.5 h-4 w-4 fas fa-building text-gray-400"></i>
+                        {{ company.name }}
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <i class="flex-shrink-0 mr-1.5 h-4 w-4 fas fa-id-badge text-gray-400"></i>
+                        {{ employee.role }} - {{ employee.department }}
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <i class="flex-shrink-0 mr-1.5 h-4 w-4 fas fa-calendar text-gray-400"></i>
+                        {{ today_attendance.date|date:"F d, Y" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-8">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Check In -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-sign-in-alt text-2xl text-green-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Check In</dt>
+                                <dd class="text-lg font-medium text-gray-900">
+                                    {% if today_attendance.check_in_time %}
+                                        {{ today_attendance.check_in_time|time:"H:i" }}
+                                    {% else %}
+                                        Not checked in
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        {% if not today_attendance.check_in_time %}
+                            <button onclick="checkIn()" 
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                                Check In Now
+                            </button>
+                        {% else %}
+                            <button class="w-full bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded cursor-not-allowed" disabled>
+                                Already Checked In
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Check Out -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-sign-out-alt text-2xl text-red-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Check Out</dt>
+                                <dd class="text-lg font-medium text-gray-900">
+                                    {% if today_attendance.check_out_time %}
+                                        {{ today_attendance.check_out_time|time:"H:i" }}
+                                    {% else %}
+                                        Not checked out
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        {% if today_attendance.check_in_time and not today_attendance.check_out_time %}
+                            <button onclick="checkOut()" 
+                                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                                Check Out Now
+                            </button>
+                        {% elif not today_attendance.check_in_time %}
+                            <button class="w-full bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded cursor-not-allowed" disabled>
+                                Check In First
+                            </button>
+                        {% else %}
+                            <button class="w-full bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded cursor-not-allowed" disabled>
+                                Already Checked Out
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Hours -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock text-2xl text-blue-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Hours Today</dt>
+                                <dd class="text-lg font-medium text-gray-900">
+                                    {% if today_attendance.total_hours %}
+                                        {{ today_attendance.total_hours|seconds_to_hours }}h
+                                    {% else %}
+                                        0.0h
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            {% if today_attendance.is_checked_in %}
+                                <i class="fas fa-circle text-2xl text-green-500"></i>
+                            {% elif today_attendance.is_checked_out %}
+                                <i class="fas fa-circle text-2xl text-gray-500"></i>
+                            {% else %}
+                                <i class="fas fa-circle text-2xl text-red-500"></i>
+                            {% endif %}
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Status</dt>
+                                <dd class="text-lg font-medium text-gray-900">
+                                    {% if today_attendance.is_checked_in %}
+                                        Working
+                                    {% elif today_attendance.is_checked_out %}
+                                        Off Duty
+                                    {% else %}
+                                        Not Started
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if employee.role == 'Admin' %}
+        <!-- Admin Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Company Statistics -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Company Overview</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ total_employees }}</div>
+                        <div class="text-sm text-gray-500">Total Employees</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600">{{ checked_in_today }}</div>
+                        <div class="text-sm text-gray-500">Checked In Today</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-red-600">{{ checked_out_today }}</div>
+                        <div class="text-sm text-gray-500">Completed Day</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Admin Actions</h3>
+                <div class="space-y-3">
+                    <a href="{% url 'add_employee' %}" 
+                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                        <i class="fas fa-user-plus mr-2"></i>Add New Employee
+                    </a>
+                    <a href="{% url 'employee_list' %}" 
+                       class="block w-full bg-gray-600 hover:bg-gray-700 text-white text-center font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                        <i class="fas fa-users mr-2"></i>Manage Employees
+                    </a>
+                    <a href="{% url 'attendance_reports' %}" 
+                       class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                        <i class="fas fa-chart-bar mr-2"></i>View Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Attendance -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Today's Attendance</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Employee
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Department
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Check In
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Check Out
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Hours
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for attendance in today_attendances %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-8 w-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-medium text-sm">
+                                            {{ attendance.employee.user.first_name.0|upper }}{{ attendance.employee.user.last_name.0|upper }}
+                                        </div>
+                                        <div class="ml-3">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ attendance.employee.user.get_full_name }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ attendance.employee.employee_id }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ attendance.employee.get_department_display }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {% if attendance.check_in_time %}
+                                        {{ attendance.check_in_time|time:"H:i" }}
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {% if attendance.check_out_time %}
+                                        {{ attendance.check_out_time|time:"H:i" }}
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {% if attendance.total_hours %}
+                                        {{ attendance.total_hours|seconds_to_hours }}h
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if attendance.is_checked_in %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-circle text-green-500 mr-1"></i>Working
+                                        </span>
+                                    {% elif attendance.is_checked_out %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-circle text-gray-500 mr-1"></i>Completed
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <i class="fas fa-circle text-red-500 mr-1"></i>Absent
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                    No attendance records for today
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function checkIn() {
+    fetch('{% url "check_in" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Error checking in');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error checking in');
+    });
+}
+
+function checkOut() {
+    fetch('{% url "check_out" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Error checking out');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error checking out');
+    });
+}
+</script>
+{% endblock %}

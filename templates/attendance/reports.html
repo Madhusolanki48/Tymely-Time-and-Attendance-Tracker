@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load time_filters %}
+
+{% block title %}Attendance Reports - Time & Attendance System{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-3xl font-bold text-gray-900">Attendance Reports</h1>
+            <p class="mt-2 text-sm text-gray-700">
+                View and analyze attendance data for all employees in your company.
+            </p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mt-8 bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Filter Reports</h3>
+        <form method="get" class="grid grid-cols-1 gap-6 sm:grid-cols-4">
+            <div>
+                <label for="date_from" class="block text-sm font-medium text-gray-700">From Date</label>
+                <input type="date" name="date_from" id="date_from" value="{{ filters.date_from }}"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            
+            <div>
+                <label for="date_to" class="block text-sm font-medium text-gray-700">To Date</label>
+                <input type="date" name="date_to" id="date_to" value="{{ filters.date_to }}"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            
+            <div>
+                <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
+                <select name="department" id="department"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="">All Departments</option>
+                    <option value="HR" {% if filters.department == 'HR' %}selected{% endif %}>Human Resources</option>
+                    <option value="IT" {% if filters.department == 'IT' %}selected{% endif %}>Information Technology</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="employee_id" class="block text-sm font-medium text-gray-700">Employee</label>
+                <select name="employee_id" id="employee_id"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="">All Employees</option>
+                    {% for employee in employees %}
+                        <option value="{{ employee.id }}" {% if filters.employee_id == employee.id|stringformat:'s' %}selected{% endif %}>
+                            {{ employee.user.get_full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="sm:col-span-4">
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                    <i class="fas fa-filter mr-2"></i>Apply Filters
+                </button>
+                <a href="{% url 'attendance_reports' %}"
+                   class="ml-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                    <i class="fas fa-times mr-2"></i>Clear Filters
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Reports Table -->
+    <div class="mt-8 flex flex-col">
+        <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Employee
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Check In
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Check Out
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Hours
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="relative px-6 py-3">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for attendance in attendances %}
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-sm">
+                                                {{ attendance.employee.user.first_name.0|upper }}{{ attendance.employee.user.last_name.0|upper }}
+                                            </div>
+                                            <div class="ml-3">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ attendance.employee.user.get_full_name }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ attendance.employee.employee_id }} - {{ attendance.employee.get_department_display }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ attendance.date|date:"M d, Y" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if attendance.check_in_time %}
+                                            {{ attendance.check_in_time|time:"H:i" }}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if attendance.check_out_time %}
+                                            {{ attendance.check_out_time|time:"H:i" }}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if attendance.total_hours %}
+                                            {{ attendance.total_hours|seconds_to_hours }}h
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        {% if attendance.is_checked_in %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-circle text-green-500 mr-1"></i>Working
+                                            </span>
+                                        {% elif attendance.is_checked_out %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                <i class="fas fa-circle text-gray-500 mr-1"></i>Completed
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                <i class="fas fa-circle text-red-500 mr-1"></i>Absent
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="{% url 'employee_profile' attendance.employee.id %}"
+                                           class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-user"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                                        <div class="flex flex-col items-center py-8">
+                                            <i class="fas fa-chart-bar text-4xl text-gray-300 mb-4"></i>
+                                            <h3 class="text-lg font-medium text-gray-900 mb-2">No attendance records found</h3>
+                                            <p class="text-sm text-gray-500">Try adjusting your filters or date range.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    {% if attendances %}
+        <div class="mt-6 flex justify-end space-x-3">
+            <button onclick="exportToCSV()"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                <i class="fas fa-file-csv mr-2"></i>Export to CSV
+            </button>
+            <button onclick="window.print()"
+                    class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                <i class="fas fa-print mr-2"></i>Print Report
+            </button>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function exportToCSV() {
+    // Simple CSV export functionality
+    let csv = 'Employee,Date,Check In,Check Out,Hours,Status\n';
+    
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 1) {
+            const employee = cells[0].querySelector('.text-sm.font-medium').textContent.trim();
+            const date = cells[1].textContent.trim();
+            const checkIn = cells[2].textContent.trim();
+            const checkOut = cells[3].textContent.trim();
+            const hours = cells[4].textContent.trim();
+            const status = cells[5].textContent.trim();
+            
+            csv += `"${employee}","${date}","${checkIn}","${checkOut}","${hours}","${status}"\n`;
+        }
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'attendance_report.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Set default date range (last 30 days)
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    if (!document.getElementById('date_from').value) {
+        document.getElementById('date_from').value = thirtyDaysAgo.toISOString().split('T')[0];
+    }
+    if (!document.getElementById('date_to').value) {
+        document.getElementById('date_to').value = today.toISOString().split('T')[0];
+    }
+});
+</script>
+{% endblock %}

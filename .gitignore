@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Django
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+*.sqlite
+*.env
+.env*
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Migrations
+*/migrations/__pycache__/
+*/migrations/*.pyc
+*/migrations/*.pyo
+*/migrations/*.pyd
+*/migrations/*.py[cod]
+*/migrations/*.log
+*/migrations/*.pot
+*/migrations/*.pyc
+*/migrations/*.pyo
+*/migrations/*.db
+
+# Static/Media
+staticfiles/
+media/
+
+# Node
+node_modules/
+
+# Favicon generator
+favicon_generator.html
+
+# Others
+*.bak
+*.swp
+*.swo
+*.tmp
+*.orig
+.idea/
+TEMPLATE_FIXES_SUMMARY.md

@@ -1,0 +1,162 @@
+/* Custom styles for Time & Attendance System */
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background: white !important;
+    }
+    
+    .bg-gray-50 {
+        background: white !important;
+    }
+    
+    .shadow {
+        box-shadow: none !important;
+    }
+}
+
+/* Loading spinner */
+.spinner {
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom table styles */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Custom button animations */
+.btn-pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Status indicators */
+.status-online {
+    position: relative;
+}
+
+.status-online::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background-color: #10b981;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+/* Custom form styles */
+.form-floating {
+    position: relative;
+}
+
+.form-floating input:focus + label,
+.form-floating input:not(:placeholder-shown) + label {
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+/* Dashboard cards hover effect */
+.card-hover {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-sm-full {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Custom alerts */
+.alert-floating {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    min-width: 300px;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Dark mode styles (optional) */
+@media (prefers-color-scheme: dark) {
+    .dark-mode {
+        background-color: #1a202c;
+        color: #e2e8f0;
+    }
+    
+    .dark-mode .bg-white {
+        background-color: #2d3748;
+    }
+    
+    .dark-mode .text-gray-900 {
+        color: #e2e8f0;
+    }
+    
+    .dark-mode .border-gray-200 {
+        border-color: #4a5568;
+    }
+}

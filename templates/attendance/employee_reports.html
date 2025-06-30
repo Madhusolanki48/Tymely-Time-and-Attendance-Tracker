@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load time_filters %}
+
+{% block title %}{{ employee.user.get_full_name }} - Attendance Reports{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+            <div class="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="h-12 w-12 rounded-full bg-white flex items-center justify-center text-blue-600 font-bold">
+                            {{ employee.user.first_name.0|upper }}{{ employee.user.last_name.0|upper }}
+                        </div>
+                        <div class="ml-4 text-white">
+                            <h1 class="text-xl font-bold">{{ employee.user.get_full_name }}</h1>
+                            <p class="text-blue-100">Attendance Reports</p>
+                        </div>
+                    </div>
+                    <div class="text-white">
+                        <p class="text-sm">{{ employee.employee_id }}</p>
+                        <p class="text-sm">{{ employee.get_department_display }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-calendar-check text-2xl text-green-500"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Present Days</dt>
+                                <dd class="text-lg font-medium text-gray-900">{{ present_days }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-calendar-times text-2xl text-red-500"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Absent Days</dt>
+                                <dd class="text-lg font-medium text-gray-900">{{ absent_days }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock text-2xl text-blue-500"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Hours</dt>
+                                <dd class="text-lg font-medium text-gray-900">{{ total_working_hours }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-percentage text-2xl text-purple-500"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Attendance Rate</dt>
+                                <dd class="text-lg font-medium text-gray-900">
+                                    {% if total_days > 0 %}
+                                        {{ present_days|percentage:total_days }}%
+                                    {% else %}
+                                        0.0%
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Date Range Filter</h3>
+            <form method="get" class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                <div>
+                    <label for="date_from" class="block text-sm font-medium text-gray-700">From Date</label>
+                    <input type="date" name="date_from" id="date_from" value="{{ filters.date_from }}"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                
+                <div>
+                    <label for="date_to" class="block text-sm font-medium text-gray-700">To Date</label>
+                    <input type="date" name="date_to" id="date_to" value="{{ filters.date_to }}"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                
+                <div class="flex items-end">
+                    <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out mr-2">
+                        <i class="fas fa-filter mr-2"></i>Apply Filter
+                    </button>
+                    <a href="{% url 'employee_attendance_reports' employee.id %}"
+                       class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                        <i class="fas fa-times mr-2"></i>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Attendance Records -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Attendance Records</h3>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Day
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Check In
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Check Out
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Total Hours
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for attendance in attendances %}
+                            <tr class="{% cycle 'bg-white' 'bg-gray-50' %}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ attendance.date|date:"M d, Y" }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ attendance.date|date:"l" }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    {% if attendance.check_in_time %}
+                                        <span class="text-green-600 font-medium">{{ attendance.check_in_time|time:"H:i" }}</span>
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    {% if attendance.check_out_time %}
+                                        <span class="text-red-600 font-medium">{{ attendance.check_out_time|time:"H:i" }}</span>
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    {% if attendance.total_hours %}
+                                        <span class="text-blue-600 font-medium">
+                                            {{ attendance.total_hours|seconds_to_hours }}h
+                                        </span>
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if attendance.is_checked_in %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-circle text-green-500 mr-1"></i>Working
+                                        </span>
+                                    {% elif attendance.is_checked_out %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-circle text-gray-500 mr-1"></i>Completed
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <i class="fas fa-circle text-red-500 mr-1"></i>Absent
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                    <div class="flex flex-col items-center py-8">
+                                        <i class="fas fa-calendar-alt text-4xl text-gray-300 mb-4"></i>
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">No attendance records found</h3>
+                                        <p class="text-sm text-gray-500">Try adjusting the date range filter.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 flex justify-between">
+            <div>
+                {% if current_employee.role == 'Admin' %}
+                    <a href="{% url 'employee_profile' employee.id %}"
+                       class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                        <i class="fas fa-user mr-2"></i>View Profile
+                    </a>
+                {% else %}
+                    <a href="{% url 'dashboard' %}"
+                       class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                    </a>
+                {% endif %}
+            </div>
+            
+            {% if attendances %}
+                <div class="space-x-3">
+                    <button onclick="exportToCSV()"
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                        <i class="fas fa-file-csv mr-2"></i>Export CSV
+                    </button>
+                    <button onclick="window.print()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+                        <i class="fas fa-print mr-2"></i>Print
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function exportToCSV() {
+    const employeeName = '{{ employee.user.get_full_name }}';
+    const dateRange = '{{ filters.date_from }} to {{ filters.date_to }}';
+    
+    let csv = `Employee: ${employeeName}\nDate Range: ${dateRange}\n\n`;
+    csv += 'Date,Day,Check In,Check Out,Total Hours,Status\n';
+    
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 1) {
+            const date = cells[0].textContent.trim();
+            const day = cells[1].textContent.trim();
+            const checkIn = cells[2].textContent.trim();
+            const checkOut = cells[3].textContent.trim();
+            const hours = cells[4].textContent.trim();
+            const status = cells[5].textContent.trim();
+            
+            csv += `"${date}","${day}","${checkIn}","${checkOut}","${hours}","${status}"\n`;
+        }
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${employeeName.replace(' ', '_')}_attendance_report.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}
+
+animeshsinghas2003@gmail.com
