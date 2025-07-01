@@ -11,23 +11,43 @@
     <link rel="mask-icon" href="{% static 'favicon.svg' %}" color="#2563eb">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        gray: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
                         }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
                     }
                 }
             }
@@ -36,40 +56,51 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-sans">
     {% if user.is_authenticated %}
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
+    <nav class="nav-enhanced sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between">
-                <div class="flex">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="{% url 'dashboard' %}" class="text-2xl font-bold text-primary-600">
-                            <i class="fas fa-clock mr-2"></i>TimeTracker
+                        <a href="{% url 'dashboard' %}" class="text-2xl font-bold">
+                            <span class="text-primary-600">
+                                <i class="fas fa-clock mr-2"></i>TimeTracker
+                            </span>
                         </a>
                     </div>
-                    <div class="hidden md:ml-6 md:flex md:space-x-8">
+                    <div class="hidden md:ml-8 md:flex md:space-x-1">
                         <a href="{% url 'dashboard' %}"
-                            class="border-primary-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            class="nav-link active inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg">
                             <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                         </a>
                         {% if user.employee and user.employee.role == 'Admin' %}
                         <a href="{% url 'employee_list' %}"
-                            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            class="nav-link inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg">
                             <i class="fas fa-users mr-2"></i>Employees
                         </a>
                         <a href="{% url 'attendance_reports' %}"
-                            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            class="nav-link inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg">
                             <i class="fas fa-chart-bar mr-2"></i>Reports
                         </a>
                         {% endif %}
                         <a href="{% url 'today_attendance' %}"
-                            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            class="nav-link inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg">
                             <i class="fas fa-calendar-day mr-2"></i>My Attendance
                         </a>
                     </div>
                 </div>
                 <div class="flex items-center">
+                    <!-- Live Clock -->
+                    <div class="flex items-center mr-4 text-sm text-gray-600">
+                        <i class="fas fa-clock mr-2 hidden md:inline"></i>
+                        <div id="live-clock">
+                            <div id="current-time" class="font-semibold text-right md:text-left"></div>
+                            <div id="current-date"
+                                class="text-xs text-gray-500 text-right md:text-left hidden md:block"></div>
+                        </div>
+                    </div>
                     <div class="flex-shrink-0">
                         <div class="relative inline-block text-left">
                             <div>
@@ -95,7 +126,7 @@
                                     </p>
                                     {% if user.employee %}
                                     <p class="text-xs text-gray-500" role="none">{{ user.employee.role }} - {{
-                                        user.employee.department }}</p>
+                                        user.employee.get_department_display }}</p>
                                     {% else %}
                                     <p class="text-xs text-gray-500" role="none">Admin</p>
                                     {% endif %}
@@ -197,6 +228,75 @@
             }
         });
 
+        // Live Clock functionality
+        function updateNavClock() {
+            try {
+                const now = new Date();
+
+                // Try IST timezone first, fallback to UTC+5:30 calculation
+                let timeString, dateString;
+
+                try {
+                    timeString = now.toLocaleTimeString('en-IN', {
+                        hour12: true,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        timeZone: 'Asia/Kolkata'
+                    });
+
+                    dateString = now.toLocaleDateString('en-IN', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        timeZone: 'Asia/Kolkata'
+                    });
+                } catch (e) {
+                    // Fallback for browsers that don't support timeZone
+                    const istOffset = 5.5 * 60; // IST is UTC+5:30
+                    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                    const istTime = new Date(utc + (istOffset * 60000));
+
+                    timeString = istTime.toLocaleTimeString('en-IN', {
+                        hour12: true,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+
+                    dateString = istTime.toLocaleDateString('en-IN', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short'
+                    });
+                }
+
+                const timeElement = document.getElementById('current-time');
+                const dateElement = document.getElementById('current-date');
+
+                if (timeElement) {
+                    timeElement.textContent = timeString;
+                }
+                if (dateElement) {
+                    dateElement.textContent = dateString;
+                }
+            } catch (error) {
+                console.error('Clock update error:', error);
+                // Show simple fallback
+                const timeElement = document.getElementById('current-time');
+                if (timeElement) {
+                    timeElement.textContent = new Date().toLocaleTimeString();
+                }
+            }
+        }
+
+        // Initialize clock when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            updateNavClock();
+            // Update every second
+            setInterval(updateNavClock, 1000);
+        });
+
         // Auto-hide alerts after 5 seconds
         setTimeout(function () {
             const alerts = document.querySelectorAll('.alert');
@@ -209,6 +309,7 @@
             });
         }, 5000);
     </script>
+    <script src="{% static 'js/app.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 
