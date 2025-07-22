@@ -125,10 +125,7 @@
                                     <p class="text-sm font-medium text-gray-900 truncate" role="none">{{ user.email }}
                                     </p>
                                     {% if user.employee %}
-                                    <p class="text-xs text-gray-500" role="none">{{ user.employee.role }} - {% if
-                                        user.employee.department == 'HR' %}Human Resources{% elif
-                                        user.employee.department == 'IT' %}Information Technology{% else %}{{
-                                        user.employee.department }}{% endif %}</p>
+                                    <p class="text-xs text-gray-500" role="none">{{ user.employee.role }} - {% if user.employee.department == 'HR' %}Human Resources{% elif user.employee.department == 'IT' %}Information Technology{% else %}{{ user.employee.department }}{% endif %}</p>
                                     {% else %}
                                     <p class="text-xs text-gray-500" role="none">Admin</p>
                                     {% endif %}
