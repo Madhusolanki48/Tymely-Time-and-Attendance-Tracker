@@ -76,7 +76,22 @@ def employee_list(request):
             return redirect('dashboard')
         
         employees = Employee.objects.filter(company=current_employee.company).order_by('-created_at')
-        return render(request, 'employees/employee_list.html', {'employees': employees})
+        
+        # Calculate statistics
+        total_employees = employees.count()
+        hr_employees = employees.filter(department='HR').count()
+        it_employees = employees.filter(department='IT').count()
+        active_employees = employees.filter(user__is_active=True).count()
+        
+        context = {
+            'employees': employees,
+            'total_employees': total_employees,
+            'hr_employees': hr_employees,
+            'it_employees': it_employees,
+            'active_employees': active_employees,
+        }
+        
+        return render(request, 'employees/employee_list.html', context)
         
     except Employee.DoesNotExist:
         messages.error(request, 'Employee profile not found.')
