@@ -6,7 +6,7 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9"
+        "runtime": "python3.11"
       }
     }
   ],
@@ -21,13 +21,12 @@
     }
   ],
   "env": {
-    "PYTHONPATH": ".",
+    "DEBUG": "False",
     "DJANGO_SETTINGS_MODULE": "attendance_system.settings"
   },
-  "build": {
-    "env": {
-      "PYTHONPATH": ".",
-      "DJANGO_SETTINGS_MODULE": "attendance_system.settings"
+  "functions": {
+    "attendance_system/wsgi.py": {
+      "maxDuration": 30
     }
   }
 }
