@@ -4,24 +4,30 @@
     {
       "src": "attendance_system/wsgi.py",
       "use": "@vercel/python",
-      "config": { "maxLambdaSize": "15mb" }
-    },
-    {
-      "src": "build_files.sh",
-      "use": "@vercel/static-build",
       "config": {
-        "distDir": "staticfiles_build"
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.9"
       }
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/staticfiles_build/static/$1"
+      "dest": "/static/$1"
     },
     {
       "src": "/(.*)",
       "dest": "attendance_system/wsgi.py"
     }
-  ]
+  ],
+  "env": {
+    "PYTHONPATH": ".",
+    "DJANGO_SETTINGS_MODULE": "attendance_system.settings"
+  },
+  "build": {
+    "env": {
+      "PYTHONPATH": ".",
+      "DJANGO_SETTINGS_MODULE": "attendance_system.settings"
+    }
+  }
 }
