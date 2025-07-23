@@ -32,12 +32,18 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-
-# REPLACE THIS LINE:
-# ALLOWED_HOSTS = []
-
-# WITH THIS:
+# ALLOWED_HOSTS configuration
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# Add Vercel URLs if deploying to Vercel
+if os.getenv('VERCEL_URL'):
+    ALLOWED_HOSTS.append(os.getenv('VERCEL_URL'))
+    
+# Always allow Vercel domains
+ALLOWED_HOSTS.extend([
+    '.vercel.app',
+    '*.vercel.app',
+])
 
 
 # Application definition
@@ -141,20 +147,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Different static file handling for Vercel vs other deployments
-if os.getenv('VERCEL'):
-    # Vercel deployment
-    STATIC_ROOT = BASE_DIR / 'static'
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-else:
-    # Other deployments (like local or traditional hosting)
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
+# Static files configuration for Vercel
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-] if not os.getenv('VERCEL') else []
+]
+
+# Use whitenoise for static files in production
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
