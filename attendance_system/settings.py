@@ -141,13 +141,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Different static file handling for Vercel vs other deployments
+if os.getenv('VERCEL'):
+    # Vercel deployment
+    STATIC_ROOT = BASE_DIR / 'static'
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    # Other deployments (like local or traditional hosting)
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-]
-
-# WhiteNoise configuration for serving static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+] if not os.getenv('VERCEL') else []
 
 # Media files
 MEDIA_URL = '/media/'
