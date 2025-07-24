@@ -11,7 +11,6 @@ Welcome to Tymely, a time and attendance tracking system built with Django! This
 |------------|------|
 | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" width="20" height="20" /> | HTML5 |
 | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" width="20" height="20" /> | Tailwind CSS |
-| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" width="20" height="20" /> | JavaScript (ES6+) |
 | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg" width="20" height="20" /> | Django 4.2.7 |
 | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" width="20" height="20" /> | Python 3.x |
 | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg" width="20" height="20" /> | SQLite (dev) |
@@ -36,12 +35,11 @@ Tymely-Time-and-Attendance-Tracker/
 
 ## ✨ Features
 
-- **🔐 Role-Based Access**: Admin, Manager, Team Lead, Employee, Intern
+- **🔐 Role-Based Access**: Admin
 - **🏢 Company Management**: Register and manage companies
 - **👥 Employee Management**: Onboard, edit, and manage employees
 - **🕒 Time Tracking**: Daily check-in/check-out with auto time calculation
 - **📊 Attendance Reports**: Filter, view, and export reports (CSV)
-- **📱 Responsive Design**: Mobile-friendly UI with Tailwind CSS
 - **🔄 Real-Time Updates**: Live attendance and status
 - **🔑 Password Management**: Admin-controlled password reset
 - **🗂️ Department Support**: HR and IT departments
@@ -50,16 +48,33 @@ Tymely-Time-and-Attendance-Tracker/
 ## 📸 Application Pages
 
 ### Dashboard
-_Role-specific dashboards with relevant information._
+_Overview of your workday and quick actions._
 
-### Attendance Reports
-_Admins can generate, filter, and export attendance reports._
+![Dashboard Screenshot](readmeImages/Dashboard.png)
 
 ### Employee Management
 _Add, edit, and manage employee profiles and roles._
 
-### Authentication
-_Secure login, registration, and password reset._
+![Employee_Management Screenshot](readmeImages/Employee_Management.png)
+
+
+### Attendance Reports
+_Admins can generate, filter, and export attendance reports._
+
+![Attendance_Reports Screenshot](readmeImages/Attendance_Reports.png)
+
+
+### My Attendance
+_View and track your daily attendance records._
+
+![My_Attendance Screenshot](readmeImages/My_Attendance.png)
+
+### My Profile
+_Manage your personal and professional details._
+
+![My_Profile Screenshot](readmeImages/My_Profile.png)
+
+
 
 ##  Setup Guide
 
