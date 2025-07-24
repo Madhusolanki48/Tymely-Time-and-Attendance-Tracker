@@ -35,7 +35,7 @@ Tymely-Time-and-Attendance-Tracker/
 
 ## ✨ Features
 
-- **🔐 Role-Based Access**: Admin
+- **🔐 Role-Based Access**: Admin, Manager
 - **🏢 Company Management**: Register and manage companies
 - **👥 Employee Management**: Onboard, edit, and manage employees
 - **🕒 Time Tracking**: Daily check-in/check-out with auto time calculation
@@ -57,12 +57,10 @@ _Add, edit, and manage employee profiles and roles._
 
 ![Employee_Management Screenshot](readmeImages/Employee_Management.png)
 
-
 ### Attendance Reports
 _Admins can generate, filter, and export attendance reports._
 
 ![Attendance_Reports Screenshot](readmeImages/Attendance_Reports.png)
-
 
 ### My Attendance
 _View and track your daily attendance records._
@@ -75,8 +73,7 @@ _Manage your personal and professional details._
 ![My_Profile Screenshot](readmeImages/My_Profile.png)
 
 
-
-##  Setup Guide
+## Setup Guide
 
 ### Local Development
 
@@ -136,11 +133,10 @@ During development and deployment, you may encounter:
 ## 🚀 Future Improvements
 
 - **📈 Advanced Analytics**: Add charts and visualizations for attendance data
-- **📱 Mobile App**: Native mobile app for employees
 - **🔔 Notifications**: Email and real-time notifications
-- **🌐 Multi-language Support**: Internationalization
-- **🌙 Dark Mode**: User-selectable themes
 - **📝 Leave Management**: Track and approve leave requests
+- **📊Infographics of data analytics**:Shows key attendance trends and stats visually.
+- **📈Extension to Django REST APIs**:Provides scalable, API-based access to attendance data.
 
 ## 💻 Possible Technical Improvements
 
