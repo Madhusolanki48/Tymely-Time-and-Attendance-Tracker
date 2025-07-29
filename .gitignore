@@ -37,7 +37,11 @@ Thumbs.db
 
 # Static/Media
 staticfiles/
+staticfiles_build/
 media/
+
+# Vercel
+.vercel
 
 # Node
 node_modules/
