@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'attendance_system.wsgi.application'
 
 # Database configuration
 # Use PostgreSQL on Vercel (Render database), SQLite locally
-if 'VERCEL' in os.environ:
+if 'VERCEL' in os.environ and os.environ.get('DB_NAME'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
