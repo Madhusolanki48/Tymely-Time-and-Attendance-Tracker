@@ -5,6 +5,9 @@ echo "Building the project..."
 
 python3 -m pip install -r requirements.txt
 
+echo "Running database migrations..."
+python3 manage.py migrate --noinput
+
 echo "Collect Static..."
 python3 manage.py collectstatic --noinput --clear
 
